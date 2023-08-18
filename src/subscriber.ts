@@ -587,7 +587,7 @@ export class Subscriber extends EventEmitter {
     this.updateAckDeadline(ackTimeSeconds);
 
     await this._acks.add(message);
-    this._inventory.remove(message);
+    this._inventory.remove(message, true);
 
     // No exception means Success.
     return AckResponses.Success;
