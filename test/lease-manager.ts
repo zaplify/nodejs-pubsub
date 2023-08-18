@@ -425,7 +425,7 @@ describe('LeaseManager', () => {
       const message = new FakeMessage();
 
       leaseManager.add(message as {} as Message);
-      leaseManager.remove(new FakeMessage() as {} as Message);
+      leaseManager.remove(new FakeMessage() as {} as Message, false);
 
       assert.strictEqual(leaseManager.size, 1);
       assert.strictEqual(leaseManager.bytes, message.length);
@@ -435,7 +435,7 @@ describe('LeaseManager', () => {
       const message = new FakeMessage() as {} as Message;
 
       leaseManager.add(message);
-      leaseManager.remove(message);
+      leaseManager.remove(message, false);
 
       assert.strictEqual(leaseManager.size, 0);
       assert.strictEqual(leaseManager.bytes, 0);
@@ -446,7 +446,7 @@ describe('LeaseManager', () => {
 
       leaseManager.setOptions({maxMessages: 1});
       leaseManager.add(message);
-      setImmediate(() => leaseManager.remove(message));
+      setImmediate(() => leaseManager.remove(message, false));
 
       leaseManager.on('free', () => {
         assert.strictEqual(leaseManager.size, 0);
@@ -467,7 +467,7 @@ describe('LeaseManager', () => {
 
       leaseManager.add(new FakeMessage() as {} as Message);
       leaseManager.add(pending);
-      leaseManager.remove(pending);
+      leaseManager.remove(pending, true);
 
       assert.strictEqual(leaseManager.pending, 0);
       setImmediate(done);
@@ -491,7 +491,7 @@ describe('LeaseManager', () => {
 
       leaseManager.add(temp);
       leaseManager.add(pending);
-      leaseManager.remove(temp);
+      leaseManager.remove(temp, true);
     });
 
     it('should cancel any extensions if no messages are left', () => {
@@ -500,7 +500,7 @@ describe('LeaseManager', () => {
       const stub = sandbox.stub(subscriber, 'modAck').resolves();
 
       leaseManager.add(message);
-      leaseManager.remove(message);
+      leaseManager.remove(message, true);
 
       clock.tick(subscriber.ackDeadline * 1000 * 2);
 
@@ -518,7 +518,7 @@ describe('LeaseManager', () => {
       leaseManager.add(littleMessage);
       assert.strictEqual(leaseManager.isFull(), false);
 
-      leaseManager.remove(littleMessage);
+      leaseManager.remove(littleMessage, true);
       bigMessage.length = defaultOptions.subscription.maxOutstandingBytes * 2;
       leaseManager.add(bigMessage as {} as Message);
       assert.strictEqual(leaseManager.isFull(), true);
