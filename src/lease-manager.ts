@@ -153,9 +153,10 @@ export class LeaseManager extends EventEmitter {
    * @fires LeaseManager#free
    *
    * @param {Message} message The message to remove.
+   * @param {boolean} runNextInQueue Should dispense next awaiting message
    * @private
    */
-  remove(message: Message): void {
+  remove(message: Message, runNextInQueue: boolean): void {
     if (!this._messages.has(message)) {
       return;
     }
@@ -170,7 +171,7 @@ export class LeaseManager extends EventEmitter {
     } else if (this._pending.includes(message)) {
       const index = this._pending.indexOf(message);
       this._pending.splice(index, 1);
-    } else if (this.pending > 0) {
+    } else if (runNextInQueue && this.pending > 0) {
       this._dispense(this._pending.shift()!);
     }
 
@@ -262,13 +263,13 @@ export class LeaseManager extends EventEmitter {
             // In the case of a permanent failure (temporary failures are retried),
             // we need to stop trying to lease-manage the message.
             message.ackFailed(e as AckError);
-            this.remove(message);
+            this.remove(message, false);
           });
         } else {
           message.modAck(deadline);
         }
       } else {
-        this.remove(message);
+        this.remove(message, false);
       }
     }
 

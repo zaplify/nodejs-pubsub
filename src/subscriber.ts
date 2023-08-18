@@ -571,7 +571,7 @@ export class Subscriber extends EventEmitter {
     resultPromise.catch(() => {});
 
     await this._acks.onFlush();
-    this._inventory.remove(message);
+    this._inventory.remove(message, true);
   }
 
   /**
@@ -686,7 +686,7 @@ export class Subscriber extends EventEmitter {
    */
   async nack(message: Message): Promise<void> {
     await this.modAck(message, 0);
-    this._inventory.remove(message);
+    this._inventory.remove(message, true);
   }
 
   /**
